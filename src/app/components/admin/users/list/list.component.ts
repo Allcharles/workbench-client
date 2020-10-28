@@ -1,4 +1,10 @@
-import { Component } from "@angular/core";
+import {
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  TemplateRef,
+  ViewChild,
+} from "@angular/core";
 import { AccountsService } from "@baw-api/account/accounts.service";
 import {
   adminCategory,
@@ -10,9 +16,9 @@ import {
   theirEditMenuItem,
   theirProfileMenuItem,
 } from "@components/profile/profile.menus";
-import { PagedTableTemplate } from "@helpers/tableTemplate/pagedTableTemplate";
+import { PagedTableTemplateV2 } from "@helpers/tableTemplate/pagedTableTemplate";
 import { AnyMenuItem } from "@interfaces/menusInterfaces";
-import { User } from "@models/User";
+import { IUser, User } from "@models/User";
 import { List } from "immutable";
 
 @Component({
@@ -20,30 +26,47 @@ import { List } from "immutable";
   templateUrl: "./list.component.html",
   styleUrls: ["./list.component.scss"],
 })
-class AdminUserListComponent extends PagedTableTemplate<TableRow, User> {
+class AdminUserListComponent
+  extends PagedTableTemplateV2<IUser, User>
+  implements OnInit {
+  @ViewChild("confirmed", { static: true })
+  public confirmedTemplate: TemplateRef<any>;
+  @ViewChild("action", { static: true })
+  public actionTemplate: TemplateRef<any>;
+
   public userIcon = theirProfileMenuItem.icon;
-  public columns = [
-    { name: "Account" },
-    { name: "User" },
-    { name: "Last Login" },
-    { name: "Confirmed" },
-  ];
-  public sortKeys = {
-    user: "userName",
-    lastLogin: "lastSeenAt",
-  };
 
-  constructor(api: AccountsService) {
-    super(api, (accounts) =>
-      accounts.map((account) => ({
-        account,
-        user: account.userName,
-        lastLogin: account.lastSeenAt?.toRelative() ?? "?",
-        confirmed: account.isConfirmed,
-      }))
-    );
-
-    this.filterKey = "userName";
+  constructor(api: AccountsService, private ref: ChangeDetectorRef) {
+    super(api, [
+      {
+        key: "user",
+        name: "User",
+        sortKey: "userName",
+        isFilterKey: true,
+        transform: (model) => model.userName,
+      },
+      {
+        key: "lastLogin",
+        name: "Last Login",
+        sortKey: "lastSeenAt",
+        width: 125,
+        transform: (model) => model.lastSeenAt?.toRelative() ?? "?",
+      },
+      {
+        key: "confirmed",
+        name: "Confirmed",
+        width: 90,
+        cellTemplate: () => this.confirmedTemplate,
+        transform: (model) => model.isConfirmed,
+      },
+      {
+        key: "actions",
+        name: "Actions",
+        width: 125,
+        cellTemplate: () => this.actionTemplate,
+        transform: (model) => model,
+      },
+    ]);
   }
 
   /**
@@ -77,10 +100,3 @@ AdminUserListComponent.LinkComponentToPageInfo({
 }).AndMenuRoute(adminUserListMenuItem);
 
 export { AdminUserListComponent };
-
-interface TableRow {
-  account: User;
-  user: string;
-  lastLogin: string;
-  confirmed: boolean;
-}
