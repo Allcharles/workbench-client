@@ -1,7 +1,7 @@
 import { ApiErrorDetails } from "@baw-api/api.interceptor.service";
 import { projectResolvers } from "@baw-api/project/projects.service";
 import { siteResolvers } from "@baw-api/site/sites.service";
-import { SiteComponent } from "@components/sites/site/site.component";
+import { SiteComponent } from "@components/sites/components/site/site.component";
 import { Project } from "@models/Project";
 import { Site } from "@models/Site";
 import { createRoutingFactory, SpectatorRouting } from "@ngneat/spectator";
