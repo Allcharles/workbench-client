@@ -49,6 +49,7 @@ export interface Settings {
     sourceRepository: string;
     sourceRepositoryIssues: string;
   };
+  hideProjects: boolean;
   customMenu: (HeaderLink | HeaderGroup)[];
 }
 
